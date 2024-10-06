@@ -15,4 +15,13 @@ app.use(express.urlencoded({extended : true , limit : "20kb" }));
 
 app.use(cookieParser());
 
+
+//routes import karenge and routers ko laane k liye middlewares laayenge
+import userRouter from "./routes/user.routes.js";
+
+app.use("/api/v1/users" , userRouter );
+
+
+
+
 export { app }
