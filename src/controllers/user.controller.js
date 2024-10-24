@@ -22,4 +22,10 @@ const registerUser = asyncHandler(async (req ,res) => {
    });
 });
 
+if(existedUser){
+   throw new ApiError(409, "User with same email and password already exists!");
+}
+
+
+
 export { registerUser }
