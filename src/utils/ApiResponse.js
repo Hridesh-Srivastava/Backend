@@ -1,12 +1,12 @@
 class ApiResponse {
     constructor(
-        message = "successful API response!",
-        data,
         statusCode,
+        data,
+        message = "successful API response!",
     ){
         this.statusCode = statusCode;
-        this.message = message;
         this.data = data;
+        this.message = message;
         this.success = statusCode < 400; //status code joki 400 se kam ho wo return ho (+ve res).
     }
 }
