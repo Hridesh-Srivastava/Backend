@@ -26,7 +26,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   //declaring local paths of coverImage and avatar
-  const avatarLocalPath = req.files?.avatar?.[0]?.path; //original path jo multer ne upload kra
+  const avatarLocalPath = req.files?.avatar[0]?.path; //original path jo multer ne upload kra
   console.log("Avatar Local Path:", avatarLocalPath);
 
   let coverImageLocalPath;
