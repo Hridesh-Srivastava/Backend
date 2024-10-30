@@ -1,6 +1,6 @@
 class ApiResponse {
     constructor(
-        statusCode,
+        statusCode, //sabse pehle statusCode rahega coz its our 1st priority, warna success="false" milega hame
         data,
         message = "successful API response!",
     ){
