@@ -85,6 +85,23 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
+//generating access and refresh tokens
+  const generateAccessAndRefreshTokens = async (userId) => {
+    try {
+      const user = await User.findById(userId);
+      const accessToken = user.generateAccessToken();
+      const refreshToken = user.generateRefreshToken();
+
+       user.refreshToken = refreshToken
+      await user.save({validateBeforeSave : false}) //validate mat karo/lagao seedha save kardo
+
+      return { accessToken , refreshToken }
+
+    } catch (error) {
+      throw new ApiError(500, "Something went wrong in generating access and refresh tokens.")
+    }
+  }
+
 //sign in
 const loginUser = asyncHandler(async (req , _) => {
   const { email, password } = req.body;
@@ -98,13 +115,26 @@ const loginUser = asyncHandler(async (req , _) => {
     $or : [{username} , {password}]
     // $or find karega koi sa bhi ek either username or password jo mil jaye uss user se related and simply return kardega
   });
-  
+
   if(!user){
     throw new ApiError(404, "User not found!")
   }
+  
+/*
+method banane k liye yaha pe ham User ka use nahi karenge coz ye User from mongodb k mongoose ka ek object hai, joki hamne methods banene me like aise
+use kia tha e.g. findById, findOne etc.. But hamne to methods k liye ek apna user create kia tha for isPasswordCorrect etc. to ham yaha pe methods k liye
+bhi yahi custom wala small user hi use karenge for validation 
+*/
+//sign in validation
+const isPasswordValid = await user.isPasswordCorrect(password);
 
-  //contd.. from here
+if(!isPasswordValid){
+  throw new ApiError(401 , "Invalid user credentials!")
+}
+
 });
 
 
-export { registerUser , loginUser };
+
+
+export { registerUser , loginUser , generateAccessAndRefreshTokens };
