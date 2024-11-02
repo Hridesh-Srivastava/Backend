@@ -132,9 +132,35 @@ if(!isPasswordValid){
   throw new ApiError(401 , "Invalid user credentials!")
 }
 
+  const {accessToken , refreshToken} = await generateAccessAndRefreshTokens(user._id);
+
+  const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+
+  //cookies declare
+  //waise to cookies frontend k through declare or set ho jati hai par iss case me hamne ye options yaha declare krdiye to ab ye
+  //server se hi operate honge , and not from frontend now.
+  const options = { 
+      httpOnly : true,
+      secure : true
+  }
+  //cookie for access and refresh tokens
+  return res.status(200).cookie(
+    "access token: " , accessToken , options
+  )
+  .cookie(
+    "refresh token: " , refreshToken , options
+  ).json(
+    new ApiResponse(
+    200,
+    {
+      user : loggedInUser , accessToken , refreshToken
+    },
+    "User logged in successfully!"
+  )
+)
 });
 
 
 
 
-export { registerUser , loginUser , generateAccessAndRefreshTokens };
+export { registerUser , loginUser };
