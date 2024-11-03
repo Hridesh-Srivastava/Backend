@@ -163,6 +163,8 @@ if(!isPasswordValid){
 //logging out (clearing all cookies here first)
 const logOutUser = asyncHandler(async(req , res) => {
   await User.findByIdAndUpdate(req.user._id , {
+    //$set object k andar me jaha bhi changes and update krna hai wo $set ko bata do wo un values me wo specific 
+    //fields ko update kardega
     $set: {
       refreshToken : undefined
     }
@@ -177,7 +179,7 @@ const logOutUser = asyncHandler(async(req , res) => {
   }
   return res.status(200).clearCookie("access token: " , options).clearCookie("refresh token: " , options)
   .json(
-    new ApiResponse(200, {} , "User logged out successfully")
+    new ApiResponse(200, {} , "User logged out successfully.")
   )
 });
 
