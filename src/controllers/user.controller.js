@@ -160,7 +160,26 @@ if(!isPasswordValid){
 
 });
 
+//logging out (clearing all cookies here first)
+const logOutUser = asyncHandler(async(req , res) => {
+  await User.findByIdAndUpdate(req.user._id , {
+    $set: {
+      refreshToken : undefined
+    }
+  },
+{
+  new : true
+});
+
+  const options = {
+    httpOnly : true,
+    secure : true
+  }
+  return res.status(200).clearCookie("access token: " , options).clearCookie("refresh token: " , options)
+  .json(
+    new ApiResponse(200, {} , "User logged out successfully")
+  )
+});
 
 
-
-export { registerUser , loginUser };
+export { registerUser , loginUser , logOutUser};
