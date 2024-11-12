@@ -107,6 +107,10 @@ const registerUser = asyncHandler(async (req, res) => {
 //sign in
 const loginUser = asyncHandler(async (req , res) => {
   const { email, password } = req.body;
+  /*
+  so as we know we create/declare new variables inside destructure, but we've maken mistake that not declared username inside destructure, but used 
+  inside $or so obviously its undeclared but used , throws an error, so make sure that to use vars. in $or here first declare it during destruture.
+  */
   console.log(email);
     
   if(!(email || password)){
@@ -226,5 +230,58 @@ const refreshAccessToken = asyncHandler(async(req , res) => {
   } catch (error) {
     throw new ApiError(401 , error?.message || "Invalid refresh token")
   }
+});
+
+//change `user` password
+const changeCurrentPassword = asyncHandler(async(req , res) => {
+  const {oldPassword , newPassword , confirmPassword} = req.body;
+  if(newPassword !== confirmPassword){
+    throw new ApiError(400, "confirm password is incorrect.")
+  }
+  const user = await User.findById(req.user?._id);
+  //check whether the old password is correct or not
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+  if(!isPasswordCorrect){
+    throw new ApiError(400, "Old password is not correct.")
+  }
+  user.password = newPassword
+  await user.save({validateBeforeSave : false});
+
+  return res.status(200).json(
+    new ApiResponse(200, {} , "Password changed successfully.")
+  )
+});
+
+//if user is logged in currently then we can instantly check the current session of that user
+const checkCurrentUser = asyncHandler(async(req , res) => {
+  return res.status(200).json(
+    new ApiResponse(200 , req.user , "User fetched successfully.")
+  )
+});
+
+//update user details
+const updateAccountDetails = asyncHandler(async(req , res) => {
+  const {fullname , email} = req.body;
+  if(!fullname || !email){
+    throw new ApiError(400 , "All fields are required.")
+  }
+  const user = await User.findByIdAndUpdate(req.user?._id , {
+    $set : {
+      fullname,
+      email : email
+    }
+  },
+    {
+      new : true
+    }).select("-password");
+
+  return res.status(200).json(
+    new ApiResponse(200 , user , "Account details updated successfully.")
+  )
 })
-export { registerUser , loginUser , logOutUser , refreshAccessToken};
+
+
+
+
+export { registerUser , loginUser , logOutUser , refreshAccessToken , changeCurrentPassword , checkCurrentUser , updateAccountDetails};
