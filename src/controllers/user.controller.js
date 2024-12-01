@@ -355,7 +355,38 @@ const updateUserAvatar = asyncHandler(async(req,res) => {
       }
     },
     { //3rd pipeline
-
+      $lookup : {
+        from : "subscriptions",
+        localField : "_id",
+        foreignField : "subscriber",
+        as : "subscribedTo"
+      }
+    },
+    { //4th pipeline
+      $addFields : {
+        subscribersCount : {
+          $size : "$subscribers"
+        },
+        channelsSubscribedToCount : {
+          $size : "$subscribedTo"
+        },
+        isSubscribed : {
+          //creating a condition $cond to check with contains 3 params, 1 is if for condition,
+          // another is then for if true and another is else for false.
+          $cond : {
+            if : {
+              $in : [req.user?._id , "$subscribers.subscriber"]
+                //$in calculates inside array and object both , checks for the things exists or not.
+            },
+            then : true,
+            else : false
+          }
+        }
+      }
+    },
+    {
+      //5th pipeline
+      
     }
   ])
  })
