@@ -386,9 +386,36 @@ const updateUserAvatar = asyncHandler(async(req,res) => {
     },
     {
       //5th pipeline
-      
+      $project: {
+        //hamare doc. k andar bahut sari fields hoti hai, ab jo jo fields ham kahenge wo return 
+        //krke dega
+        username : 1,
+        fullname : 1,
+        subscribersCount : 1,
+        channelsSubscribedToCount : 1,
+        isSubscribed : 1,
+        avatar : 1,
+        coverImage : 1,
+        email : 1
+      }
+    }
+  ]);
+  if(!channel?.length){
+    throw new ApiError(404 , "Channel does not exists.")
+  }
+  return res.status(200).json(
+  new ApiResponse(200 , channel[0] , "User channel fetched successfully!")
+ );
+ });
+
+ 
+const getWatchHistory = asyncHandler(async(req , res) => {
+  const user = await User.aggregate([
+    {
+      //1st pipeline
+
     }
   ])
- })
+})
 
-export { registerUser , loginUser , logOutUser , refreshAccessToken , changeCurrentPassword , checkCurrentUser , updateAccountDetails , updateUserAvatar , updateUserCoverImage , getUserChannelProfile };
+export { registerUser , loginUser , logOutUser , refreshAccessToken , changeCurrentPassword , checkCurrentUser , updateAccountDetails , updateUserAvatar , updateUserCoverImage , getUserChannelProfile , getWatchHistory};
