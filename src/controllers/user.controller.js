@@ -413,9 +413,59 @@ const getWatchHistory = asyncHandler(async(req , res) => {
   const user = await User.aggregate([
     {
       //1st pipeline
+      $match : {
+        //creating new object_id for mongoose
+        _id : mongoose.Types.ObjectId(req.user._id)
+      }
+    },
+    {
+      //2nd pipeline
+      $lookup : {
+        from : "videos",
+        localField : "watchHistory",
+        foreignField : "_id",
+        as : "watchHistory",
 
-    }
-  ])
+        //sub-pipeline
+        pipeline : [
+          {
+            // 1st pipeline of sub 1
+            $lookup : {
+              from : "users",
+              localField : "owner",
+              foreignField : "_id",
+              as : "owner",
+
+              //sub-pipeline 2
+              pipeline : [
+                {
+                  //1st pipeline of sub 2
+                  $project : {
+                    username : 1,
+                    fullname : 1,
+                    avatar : 1
+                  }
+                }
+              ]
+            }
+          },
+          { //hamne ye subpipeline sub1 k liye isliye banayi coz hamne sub1 k andar jo lookup krke
+            //owner declare kia tha usko add krna hai yha fields me isliye inside single pipeline
+            //2nd sub-pipeline of sub1
+            $addFields : {
+              owner : {
+                $first : "$owner" , //$first will fetch the 1st index or element 1st of array
+              }
+            }
+          }
+        ]
+      }
+    },
+  ]);
+
+  return res.status(200).json(
+  new ApiResponse(200 , user[0].watchHistory , "User watched history fetched successfully.")
+  );
 })
 
 export { registerUser , loginUser , logOutUser , refreshAccessToken , changeCurrentPassword , checkCurrentUser , updateAccountDetails , updateUserAvatar , updateUserCoverImage , getUserChannelProfile , getWatchHistory};
